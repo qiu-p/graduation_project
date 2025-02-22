@@ -1,0 +1,84 @@
+
+Gurobi 12.0.0 (win64) logging started Tue Feb  4 12:44:20 2025
+
+Set parameter LogFile to value "ysh_output/8bits_booth_0/grb.log"
+Set parameter Presolve to value 2
+Set parameter TimeLimit to value 7200
+Set parameter MIPGap to value 0.1
+Gurobi Optimizer version 12.0.0 build v12.0.0rc1 (win64 - Windows 11.0 (22631.2))
+
+CPU model: 11th Gen Intel(R) Core(TM) i7-1165G7 @ 2.80GHz, instruction set [SSE2|AVX|AVX2|AVX512]
+Thread count: 4 physical cores, 8 logical processors, using up to 8 threads
+
+Non-default parameters:
+TimeLimit  7200
+MIPGap  0.1
+Presolve  2
+
+Optimize a model with 1514 rows, 879 columns and 4482 nonzeros
+Model fingerprint: 0x7387894f
+Variable types: 386 continuous, 493 integer (493 binary)
+Coefficient statistics:
+  Matrix range     [2e-02, 1e+30]
+  Objective range  [1e+00, 1e+00]
+  Bounds range     [1e+00, 1e+00]
+  RHS range        [7e-02, 1e+30]
+Warning: Model contains large matrix coefficient range
+Warning: Model contains large rhs
+         Consider reformulating model or setting NumericFocus parameter
+         to avoid numerical issues.
+Presolve removed 1504 rows and 854 columns
+Presolve time: 0.01s
+Presolved: 10 rows, 25 columns, 50 nonzeros
+Variable types: 0 continuous, 25 integer (25 binary)
+Found heuristic solution: objective 0.5328963
+
+Explored 0 nodes (0 simplex iterations) in 0.02 seconds (0.02 work units)
+Thread count was 8 (of 8 available processors)
+
+Solution count 1: 0.532896 
+
+Optimal solution found (tolerance 1.00e-01)
+Best objective 5.328963398933e-01, best bound 5.328963398933e-01, gap 0.0000%
+
+Gurobi 12.0.0 (win64) logging started Tue Feb  4 14:48:23 2025
+
+Set parameter LogFile to value "ysh_output/8bits_booth_0/grb.log"
+Set parameter Presolve to value 2
+Set parameter TimeLimit to value 7200
+Set parameter MIPGap to value 0.1
+Gurobi Optimizer version 12.0.0 build v12.0.0rc1 (win64 - Windows 11.0 (22631.2))
+
+CPU model: 11th Gen Intel(R) Core(TM) i7-1165G7 @ 2.80GHz, instruction set [SSE2|AVX|AVX2|AVX512]
+Thread count: 4 physical cores, 8 logical processors, using up to 8 threads
+
+Non-default parameters:
+TimeLimit  7200
+MIPGap  0.1
+Presolve  2
+
+Optimize a model with 1497 rows, 869 columns and 4432 nonzeros
+Model fingerprint: 0x41378cd3
+Variable types: 382 continuous, 487 integer (487 binary)
+Coefficient statistics:
+  Matrix range     [2e-02, 1e+30]
+  Objective range  [1e+00, 1e+00]
+  Bounds range     [1e+00, 1e+00]
+  RHS range        [7e-02, 1e+30]
+Warning: Model contains large matrix coefficient range
+Warning: Model contains large rhs
+         Consider reformulating model or setting NumericFocus parameter
+         to avoid numerical issues.
+Presolve removed 1487 rows and 844 columns
+Presolve time: 0.01s
+Presolved: 10 rows, 25 columns, 50 nonzeros
+Variable types: 0 continuous, 25 integer (25 binary)
+Found heuristic solution: objective 0.5328963
+
+Explored 0 nodes (0 simplex iterations) in 0.02 seconds (0.02 work units)
+Thread count was 8 (of 8 available processors)
+
+Solution count 1: 0.532896 
+
+Optimal solution found (tolerance 1.00e-01)
+Best objective 5.328963398933e-01, best bound 5.328963398933e-01, gap 0.0000%

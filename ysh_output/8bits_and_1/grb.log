@@ -1,0 +1,98 @@
+
+Gurobi 12.0.0 (win64) logging started Tue Feb  4 13:39:13 2025
+
+Set parameter LogFile to value "ysh_output/8bits_and_1/grb.log"
+Set parameter Presolve to value 2
+Set parameter TimeLimit to value 7200
+Set parameter MIPGap to value 0.1
+Gurobi Optimizer version 12.0.0 build v12.0.0rc1 (win64 - Windows 11.0 (22631.2))
+
+CPU model: 11th Gen Intel(R) Core(TM) i7-1165G7 @ 2.80GHz, instruction set [SSE2|AVX|AVX2|AVX512]
+Thread count: 4 physical cores, 8 logical processors, using up to 8 threads
+
+Non-default parameters:
+TimeLimit  7200
+MIPGap  0.1
+Presolve  2
+
+Optimize a model with 2057 rows, 1178 columns and 6330 nonzeros
+Model fingerprint: 0x2448cc49
+Variable types: 476 continuous, 702 integer (702 binary)
+Coefficient statistics:
+  Matrix range     [7e-04, 1e+30]
+  Objective range  [1e+00, 1e+00]
+  Bounds range     [1e+00, 1e+00]
+  RHS range        [6e-02, 1e+30]
+Warning: Model contains large matrix coefficient range
+Warning: Model contains large rhs
+         Consider reformulating model or setting NumericFocus parameter
+         to avoid numerical issues.
+Presolve removed 2041 rows and 1114 columns
+Presolve time: 0.01s
+Presolved: 16 rows, 64 columns, 128 nonzeros
+Variable types: 0 continuous, 64 integer (64 binary)
+Found heuristic solution: objective 0.8144072
+
+Explored 0 nodes (0 simplex iterations) in 0.03 seconds (0.02 work units)
+Thread count was 8 (of 8 available processors)
+
+Solution count 1: 0.814407 
+
+Optimal solution found (tolerance 1.00e-01)
+Best objective 8.144072219729e-01, best bound 8.144072219729e-01, gap 0.0000%
+
+Gurobi 12.0.0 (win64) logging started Tue Feb  4 14:49:20 2025
+
+Set parameter LogFile to value "ysh_output/8bits_and_1/grb.log"
+Set parameter Presolve to value 2
+Set parameter TimeLimit to value 7200
+Set parameter MIPGap to value 0.1
+
+Gurobi 12.0.0 (win64) logging started Tue Feb  4 14:52:35 2025
+
+Set parameter LogFile to value "ysh_output/8bits_and_1/grb.log"
+Set parameter Presolve to value 2
+Set parameter TimeLimit to value 7200
+Set parameter MIPGap to value 0.1
+
+Gurobi 12.0.0 (win64) logging started Tue Feb  4 15:03:54 2025
+
+Set parameter LogFile to value "ysh_output/8bits_and_1/grb.log"
+Set parameter Presolve to value 2
+Set parameter TimeLimit to value 7200
+Set parameter MIPGap to value 0.1
+Gurobi Optimizer version 12.0.0 build v12.0.0rc1 (win64 - Windows 11.0 (22631.2))
+
+CPU model: 11th Gen Intel(R) Core(TM) i7-1165G7 @ 2.80GHz, instruction set [SSE2|AVX|AVX2|AVX512]
+Thread count: 4 physical cores, 8 logical processors, using up to 8 threads
+
+Non-default parameters:
+TimeLimit  7200
+MIPGap  0.1
+Presolve  2
+
+Optimize a model with 2148 rows, 1227 columns and 6576 nonzeros
+Model fingerprint: 0x2ca9d23c
+Variable types: 490 continuous, 737 integer (737 binary)
+Coefficient statistics:
+  Matrix range     [7e-04, 1e+30]
+  Objective range  [1e+00, 1e+00]
+  Bounds range     [1e+00, 1e+00]
+  RHS range        [6e-02, 1e+30]
+Warning: Model contains large matrix coefficient range
+Warning: Model contains large rhs
+         Consider reformulating model or setting NumericFocus parameter
+         to avoid numerical issues.
+Presolve removed 2132 rows and 1163 columns
+Presolve time: 0.01s
+Presolved: 16 rows, 64 columns, 128 nonzeros
+Variable types: 0 continuous, 64 integer (64 binary)
+Found heuristic solution: objective 0.3758803
+
+Explored 0 nodes (0 simplex iterations) in 0.02 seconds (0.02 work units)
+Thread count was 8 (of 8 available processors)
+
+Solution count 1: 0.37588 
+
+Optimal solution found (tolerance 1.00e-01)
+Best objective 3.758802562952e-01, best bound 3.758802562952e-01, gap 0.0000%

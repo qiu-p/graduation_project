@@ -1,0 +1,80 @@
+# Build and Release Folders
+bin-debug/
+bin-release/
+[Oo]bj/
+[Bb]in/
+
+# Other files and folders
+.settings/
+
+# Executables
+*.swf
+*.air
+*.ipa
+*.apk
+
+*.out
+runs/*
+npy_data/*
+*.csv
+tmp_test.py
+test_code.cpp
+ipynb/*
+outputs/*
+build/*
+tmp_test
+tmp_test_2.py
+# CMakeLists.txt
+*.pyc
+tmp_test_3.py
+# *.cpp
+# *.h
+*.c
+test
+c_call_python
+abc
+models/*
+__pycache__/*
+__pycache__/*.pyc
+npy_data_mfs2/*
+offline_results_resub/*
+xiaoyaozi_outputs/*
+shells/*
+utils/__pycache__/*
+
+*.out
+build/*
+dqn*
+outputs/*
+backup/*
+easymac*
+.bsp/*
+offline_sl/*
+seq_ppo/*
+utils/global_const.txt
+test_run_dir/*
+outputs_07g/*
+*.v
+prefix_adder/build/*
+prefix_adder/logger_log/*
+prefix_adder/outputs/*
+prefix_adder/*.out
+# Project files, i.e. `.project`, `.actionScriptProperties` and `.flexProperties`
+# should NOT be excluded as they contain compiler settings and other important
+# information for Eclipse / Flash Builder.
+ysh_log/*
+ysh_logger_output*
+
+.vscode
+pybuild
+db
+*build
+log/
+.cache
+temp*
+report*
+tmp
+*.sh
+debuglog/
+*.backup
+*.rpt

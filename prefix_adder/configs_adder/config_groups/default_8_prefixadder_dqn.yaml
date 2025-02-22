@@ -1,0 +1,27 @@
+exp_kwargs:
+  seed: null
+  alg: dqn
+
+logger_exp_kwargs:
+  exp_prefix: dqn_adder
+  base_log_dir: logger_log/dqn_8bits
+  seed: null
+
+environment:
+  class: RefineEnv
+  kwargs:
+    bit_width: 8
+    initial_state_pool_max_len: 0
+    target_delay: 500
+
+policy:
+  class: DeepQPolicy
+  kwargs:
+    bit_width: 8
+
+trainer:
+  class: DQNAlgorithm
+  kwargs:
+    len_per_episode: 25
+    total_episodes: 200
+    initial_adder_type: 1

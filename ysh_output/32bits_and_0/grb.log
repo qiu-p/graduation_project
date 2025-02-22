@@ -1,0 +1,180 @@
+
+Gurobi 12.0.0 (win64) logging started Tue Feb  4 12:44:09 2025
+
+Set parameter LogFile to value "ysh_output/32bits_and_0/grb.log"
+Set parameter Presolve to value 2
+Set parameter TimeLimit to value 7200
+Set parameter MIPGap to value 0.1
+Gurobi Optimizer version 12.0.0 build v12.0.0rc1 (win64 - Windows 11.0 (22631.2))
+
+CPU model: 11th Gen Intel(R) Core(TM) i7-1165G7 @ 2.80GHz, instruction set [SSE2|AVX|AVX2|AVX512]
+Thread count: 4 physical cores, 8 logical processors, using up to 8 threads
+
+Non-default parameters:
+TimeLimit  7200
+MIPGap  0.1
+Presolve  2
+
+Optimize a model with 94783 rows, 49546 columns and 349002 nonzeros
+Model fingerprint: 0x870d5159
+Variable types: 7608 continuous, 41938 integer (41938 binary)
+Coefficient statistics:
+  Matrix range     [6e-03, 1e+30]
+  Objective range  [1e+00, 1e+00]
+  Bounds range     [1e+00, 1e+00]
+  RHS range        [9e-02, 1e+30]
+Warning: Model contains large matrix coefficient range
+Warning: Model contains large rhs
+         Consider reformulating model or setting NumericFocus parameter
+         to avoid numerical issues.
+Presolve removed 87480 rows and 5297 columns
+Presolve time: 0.03s
+Presolved: 7303 rows, 44249 columns, 88363 nonzeros
+Variable types: 2790 continuous, 41459 integer (41459 binary)
+Found heuristic solution: objective 17.1657955
+Performing another presolve...
+Presolve removed 7239 rows and 43225 columns
+Presolve time: 0.57s
+
+Explored 1 nodes (0 simplex iterations) in 0.72 seconds (0.75 work units)
+Thread count was 8 (of 8 available processors)
+
+Solution count 2: 17.1658 17.1658 
+
+Optimal solution found (tolerance 1.00e-01)
+Best objective 1.716579549015e+01, best bound 1.716579549015e+01, gap 0.0000%
+
+Gurobi 12.0.0 (win64) logging started Tue Feb  4 14:47:56 2025
+
+Set parameter LogFile to value "ysh_output/32bits_and_0/grb.log"
+Set parameter Presolve to value 2
+Set parameter TimeLimit to value 7200
+Set parameter MIPGap to value 0.1
+Gurobi Optimizer version 12.0.0 build v12.0.0rc1 (win64 - Windows 11.0 (22631.2))
+
+CPU model: 11th Gen Intel(R) Core(TM) i7-1165G7 @ 2.80GHz, instruction set [SSE2|AVX|AVX2|AVX512]
+Thread count: 4 physical cores, 8 logical processors, using up to 8 threads
+
+Non-default parameters:
+TimeLimit  7200
+MIPGap  0.1
+Presolve  2
+
+Optimize a model with 94783 rows, 49546 columns and 349002 nonzeros
+Model fingerprint: 0x870d5159
+Variable types: 7608 continuous, 41938 integer (41938 binary)
+Coefficient statistics:
+  Matrix range     [6e-03, 1e+30]
+  Objective range  [1e+00, 1e+00]
+  Bounds range     [1e+00, 1e+00]
+  RHS range        [9e-02, 1e+30]
+Warning: Model contains large matrix coefficient range
+Warning: Model contains large rhs
+         Consider reformulating model or setting NumericFocus parameter
+         to avoid numerical issues.
+Presolve removed 87480 rows and 5297 columns
+Presolve time: 0.03s
+Presolved: 7303 rows, 44249 columns, 88363 nonzeros
+Variable types: 2790 continuous, 41459 integer (41459 binary)
+Found heuristic solution: objective 17.1657955
+Performing another presolve...
+Presolve removed 7239 rows and 43225 columns
+Presolve time: 0.51s
+
+Explored 1 nodes (0 simplex iterations) in 0.64 seconds (0.75 work units)
+Thread count was 8 (of 8 available processors)
+
+Solution count 2: 17.1658 17.1658 
+
+Optimal solution found (tolerance 1.00e-01)
+Best objective 1.716579549015e+01, best bound 1.716579549015e+01, gap 0.0000%
+
+Gurobi 12.0.0 (win64) logging started Tue Feb  4 15:18:29 2025
+
+Set parameter LogFile to value "ysh_output/32bits_and_0/grb.log"
+Set parameter Presolve to value 2
+Set parameter TimeLimit to value 7200
+Set parameter MIPGap to value 0.1
+Gurobi Optimizer version 12.0.0 build v12.0.0rc1 (win64 - Windows 11.0 (22631.2))
+
+CPU model: 11th Gen Intel(R) Core(TM) i7-1165G7 @ 2.80GHz, instruction set [SSE2|AVX|AVX2|AVX512]
+Thread count: 4 physical cores, 8 logical processors, using up to 8 threads
+
+Non-default parameters:
+TimeLimit  7200
+MIPGap  0.1
+Presolve  2
+
+Optimize a model with 94783 rows, 49546 columns and 349002 nonzeros
+Model fingerprint: 0x870d5159
+Variable types: 7608 continuous, 41938 integer (41938 binary)
+Coefficient statistics:
+  Matrix range     [6e-03, 1e+30]
+  Objective range  [1e+00, 1e+00]
+  Bounds range     [1e+00, 1e+00]
+  RHS range        [9e-02, 1e+30]
+Warning: Model contains large matrix coefficient range
+Warning: Model contains large rhs
+         Consider reformulating model or setting NumericFocus parameter
+         to avoid numerical issues.
+Presolve removed 87480 rows and 5297 columns
+Presolve time: 0.03s
+Presolved: 7303 rows, 44249 columns, 88363 nonzeros
+Variable types: 2790 continuous, 41459 integer (41459 binary)
+Found heuristic solution: objective 17.1657955
+Performing another presolve...
+Presolve removed 7239 rows and 43225 columns
+Presolve time: 0.52s
+
+Explored 1 nodes (0 simplex iterations) in 0.67 seconds (0.75 work units)
+Thread count was 8 (of 8 available processors)
+
+Solution count 2: 17.1658 17.1658 
+
+Optimal solution found (tolerance 1.00e-01)
+Best objective 1.716579549015e+01, best bound 1.716579549015e+01, gap 0.0000%
+
+Gurobi 12.0.1 (linux64) logging started Sat Feb 22 10:03:10 2025
+
+Set parameter LogFile to value "ysh_output/32bits_and_0/grb.log"
+Set parameter Presolve to value 2
+Set parameter TimeLimit to value 7200
+Set parameter MIPGap to value 0.1
+Gurobi Optimizer version 12.0.1 build v12.0.1rc0 (linux64 - "Ubuntu 24.04.2 LTS")
+
+CPU model: 12th Gen Intel(R) Core(TM) i5-12600KF, instruction set [SSE2|AVX|AVX2]
+Thread count: 8 physical cores, 8 logical processors, using up to 8 threads
+
+Non-default parameters:
+TimeLimit  7200
+MIPGap  0.1
+Presolve  2
+
+Optimize a model with 94783 rows, 49546 columns and 349002 nonzeros
+Model fingerprint: 0x870d5159
+Variable types: 7608 continuous, 41938 integer (41938 binary)
+Coefficient statistics:
+  Matrix range     [6e-03, 1e+30]
+  Objective range  [1e+00, 1e+00]
+  Bounds range     [1e+00, 1e+00]
+  RHS range        [9e-02, 1e+30]
+Warning: Model contains large matrix coefficient range
+Warning: Model contains large rhs
+         Consider reformulating model or setting NumericFocus parameter
+         to avoid numerical issues.
+Presolve removed 87480 rows and 5297 columns
+Presolve time: 0.02s
+Presolved: 7303 rows, 44249 columns, 88363 nonzeros
+Variable types: 2790 continuous, 41459 integer (41459 binary)
+Found heuristic solution: objective 17.1657955
+Performing another presolve...
+Presolve removed 7239 rows and 43225 columns
+Presolve time: 0.31s
+
+Explored 1 nodes (0 simplex iterations) in 0.41 seconds (0.72 work units)
+Thread count was 8 (of 8 available processors)
+
+Solution count 2: 17.1658 17.1658 
+
+Optimal solution found (tolerance 1.00e-01)
+Best objective 1.716579549015e+01, best bound 1.716579549015e+01, gap 0.0000%
