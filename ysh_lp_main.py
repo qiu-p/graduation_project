@@ -30,7 +30,7 @@ class WireMap:
         self._get_coefficient()
         
         initial_pp = get_initial_partial_product(self.bit_width, self.pp_encode_type)
-        ct32_decomposed, ct22_decomposed, partial_products, stage_num = decompose_compressor_tree(initial_pp, self.cur_state.ct[0], self.cur_state.ct[1])
+        ct32_decomposed, ct22_decomposed, sequence_pp, stage_num = decompose_compressor_tree(initial_pp, self.cur_state.ct[0], self.cur_state.ct[1])
         self.ct_decomposed = np.zeros([2, len(ct32_decomposed), len(initial_pp)]) # (2, stage_num, column_num)
         self.ct_decomposed[0] = ct32_decomposed
         self.ct_decomposed[1] = ct22_decomposed
@@ -38,8 +38,8 @@ class WireMap:
         self.stage_num = stage_num
         self.column_num = len(initial_pp)
         self.ct_decomposed = self.ct_decomposed.astype(int)
-        self.pp = np.insert(partial_products, 0, initial_pp, axis=0).astype(int) # (stage_num, column_num)
-
+        self.pp = sequence_pp
+        
         self.output_dir = '{}/{}bits_{}_{}/'.format(output_base_dir, self.bit_width, self.pp_encode_type, task_index)
         self.wire_map_filename = self.output_dir + 'wire_map.txt'
         make_dir(self.output_dir, 'i')

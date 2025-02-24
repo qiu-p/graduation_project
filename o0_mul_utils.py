@@ -175,46 +175,47 @@ def get_initial_partial_product(bit_width: int, encode_type: str) -> np.ndarray:
     else:
         raise NotImplementedError
 
-    return pp
+    return pp.astype(int)
 
 
-def get_wallace_tree(pp: np.ndarray, bit_width: int):
-    max_stage_num = len(pp)
+def get_wallace_tree(initial_pp: np.ndarray, bit_width: int):
+    pp_len = len(initial_pp)
+    max_stage_num = pp_len
     stage_num = 0
 
-    sequence_pp = np.zeros([1, len(pp)])
-    sequence_pp[0] = copy.deepcopy(pp)
-    ct32 = np.zeros([1, len(pp)])
-    ct22 = np.zeros([1, len(pp)])
-    target = np.asarray([2 for i in range(len(pp))])
+    sequence_pp = np.zeros([1, pp_len])
+    sequence_pp[0] = copy.deepcopy(initial_pp)
+    ct32_decomposed = np.zeros([1, pp_len])
+    ct22_decomposed = np.zeros([1, pp_len])
+    target = np.asarray([2 for i in range(pp_len)])
 
     while stage_num < max_stage_num:
         # 构造 ct
-        for i in range(0, len(pp)):
+        for i in range(0, pp_len):
             if sequence_pp[stage_num][i] % 3 == 0:
-                ct32[stage_num][i] = sequence_pp[stage_num][i] // 3
-                ct22[stage_num][i] = 0
+                ct32_decomposed[stage_num][i] = sequence_pp[stage_num][i] // 3
+                ct22_decomposed[stage_num][i] = 0
             elif sequence_pp[stage_num][i] % 3 == 1:
-                ct32[stage_num][i] = sequence_pp[stage_num][i] // 3
-                ct22[stage_num][i] = 0
+                ct32_decomposed[stage_num][i] = sequence_pp[stage_num][i] // 3
+                ct22_decomposed[stage_num][i] = 0
             elif sequence_pp[stage_num][i] % 3 == 2:
-                ct32[stage_num][i] = sequence_pp[stage_num][i] // 3
+                ct32_decomposed[stage_num][i] = sequence_pp[stage_num][i] // 3
                 if stage_num == 0:
-                    ct22[stage_num][i] = 0
+                    ct22_decomposed[stage_num][i] = 0
                 else:
-                    ct22[stage_num][i] = 1
+                    ct22_decomposed[stage_num][i] = 1
         # 构造下一阶段的 pp
-        sequence_pp = np.r_[sequence_pp, np.zeros([1, len(pp)])]
+        sequence_pp = np.r_[sequence_pp, np.zeros([1, pp_len])]
         sequence_pp[stage_num + 1][0] = (
-            sequence_pp[stage_num][0] - ct32[stage_num][0] * 2 - ct22[stage_num][0]
+            sequence_pp[stage_num][0] - ct32_decomposed[stage_num][0] * 2 - ct22_decomposed[stage_num][0]
         )
-        for i in range(1, len(pp)):
+        for i in range(1, pp_len):
             sequence_pp[stage_num + 1][i] = (
                 sequence_pp[stage_num][i]
-                + ct32[stage_num][i - 1]
-                + ct22[stage_num][i - 1]
-                - ct32[stage_num][i] * 2
-                - ct22[stage_num][i]
+                + ct32_decomposed[stage_num][i - 1]
+                + ct22_decomposed[stage_num][i - 1]
+                - ct32_decomposed[stage_num][i] * 2
+                - ct22_decomposed[stage_num][i]
             )
         stage_num += 1
 
@@ -222,17 +223,18 @@ def get_wallace_tree(pp: np.ndarray, bit_width: int):
         if (sequence_pp[stage_num] <= target).all():
             break
 
-        ct32 = np.r_[ct32, np.zeros([1, len(pp)])]
-        ct22 = np.r_[ct22, np.zeros([1, len(pp)])]
+        ct32_decomposed = np.r_[ct32_decomposed, np.zeros([1, pp_len])]
+        ct22_decomposed = np.r_[ct22_decomposed, np.zeros([1, pp_len])]
 
     assert stage_num < max_stage_num, "Exceed max stage num! Set max_stage_num larger"
-    ct32 = np.sum(ct32, axis=0)
-    ct22 = np.sum(ct22, axis=0)
-    return ct32, ct22
+    ct32 = np.sum(ct32_decomposed, axis=0)
+    ct22 = np.sum(ct22_decomposed, axis=0)
+    return ct32, ct22, ct32_decomposed, ct22_decomposed, sequence_pp.astype(int), stage_num
 
 
-def get_dadda_tree(pp: np.ndarray, bit_width: int):
-    max_stage_num = len(pp)
+def _get_dadda_tree(initial_pp: np.ndarray, bit_width: int):
+    pp_len = len(initial_pp)
+    max_stage_num = pp_len
     stage_num = 0
 
     d = []
@@ -241,10 +243,10 @@ def get_dadda_tree(pp: np.ndarray, bit_width: int):
         d.append(d_j)
         d_j = int(np.floor(1.5 * d_j))
 
-    remain_pp = copy.deepcopy(pp)
+    remain_pp = copy.deepcopy(initial_pp)
 
-    ct32 = np.zeros(len(pp))
-    ct22 = np.zeros(len(pp))
+    ct32 = np.zeros(pp_len)
+    ct22 = np.zeros(pp_len)
 
     for j in range(max_stage_num - 1, 0 - 1, -1):
         d_j = d[j]
@@ -269,6 +271,10 @@ def get_dadda_tree(pp: np.ndarray, bit_width: int):
 
     return ct32, ct22
 
+def get_dadda_tree(initial_pp: np.ndarray, bit_width: int):
+    ct32, ct22 = _get_dadda_tree(initial_pp, bit_width)
+    ct32_decomposed, ct22_decomposed, sequence_pp, stage_num = decompose_compressor_tree(initial_pp, ct32, ct22)
+    return ct32, ct22, ct32_decomposed, ct22_decomposed, sequence_pp, stage_num
 
 def get_compressor_tree(pp: np.ndarray, bit_width: int, compressor_tree_type: str):
     if compressor_tree_type == "wallace":
@@ -282,7 +288,6 @@ def get_compressor_tree(pp: np.ndarray, bit_width: int, compressor_tree_type: st
 def get_final_partial_product(initial_partial_product: np.ndarray, ct):
     final_partial_product = np.zeros(len(initial_partial_product))
     ct32, ct22 = ct
-    initial_partial_product[0] = initial_partial_product[0]
     for i in range(1, len(initial_partial_product)):
         final_partial_product[i] = (
             initial_partial_product[i]
@@ -429,11 +434,12 @@ def decompose_compressor_tree(initial_pp, ct32, ct22):
             j += 1
     
     stage_num += 1
+    sequence_pp = np.insert(partial_products, 0, initial_pp, axis=0).astype(int)
     if is_debug:
         print('\n\nct32_remain', ct32_remain)
         print('ct22_remain', ct22_remain)
 
-    return ct32_decomposed, ct22_decomposed, partial_products, stage_num
+    return ct32_decomposed, ct22_decomposed, sequence_pp, stage_num
 
 
 def legalize_compressor_tree(initial_pp, ct32, ct22):

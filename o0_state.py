@@ -33,188 +33,6 @@ net = NetList()
 
 from ysh_logger import get_logger
 
-class SimpleState:
-    def __init__(self, image_state: np.ndarray):
-        '''
-        image_state: np.ndarray (2, MAX_STAGE, pp_len)
-        '''
-        self.max_stage_num = image_state.shape[1]
-        if int(image_state.shape[2])%2 == 0:
-            self.encode_type = 'booth'
-            self.bit_width = int(image_state.shape[2] / 2)
-        else:
-            self.encode_type = 'and'
-            self.bit_width = math.ceil(image_state.shape[2] / 2)
-        self.ct = np.sum(image_state, axis=1)
-        pass
-    
-    def get_pp_len(self) -> int:
-        if self.encode_type == "and":
-            return 2 * self.bit_width - 1
-        elif self.encode_type == "booth":
-            return 2 * self.bit_width
-        else:
-            raise NotImplementedError
-    
-    # fmt: off
-    def mask_with_legality(self):
-        """
-        有些动作会导致结果 stage 超过 max stage
-        因此需要被过滤掉
-
-        问题: 哪些动作会让stage增加? 原来的方法是遍历 有没有更好的方法
-        """
-        action_type_num = 4
-        if self.use_compressor_map_optimize:
-            action_type_num += len(legal_FA_list) + len(legal_HA_list)
-
-        initial_pp = get_initial_partial_product(self.bit_width, self.encode_type)
-        mask = np.zeros([action_type_num * len(initial_pp)])
-        remain_pp = copy.deepcopy(initial_pp)
-        for column_index in range(len(remain_pp)):
-            if column_index > 0:
-                remain_pp[column_index] += self.ct[0][column_index - 1] + self.ct[1][column_index - 1]
-            remain_pp[column_index] += - 2 * self.ct[0][column_index] - self.ct[1][column_index]
-
-        legal_act = []
-        for column_index in range(2, len(initial_pp)):
-            if remain_pp[column_index] == 2:
-                legal_act.append((column_index, 0))
-                if (self.ct[1][column_index] >= 1):
-                    legal_act.append((column_index, 3))
-            if remain_pp[column_index] == 1:
-                if self.ct[0][column_index] >= 1:
-                    legal_act.append((column_index, 2))
-                if self.ct[1][column_index] >= 1:
-                    legal_act.append((column_index, 1))
-
-        for act_col, action in legal_act:
-            if action >= 4:
-                # 是改变压缩器种类的动作
-                mask[act_col * action_type_num + action] = 1
-                continue
-            pp = copy.deepcopy(remain_pp)
-            ct = copy.deepcopy(self.ct)
-
-            # change the CT structure
-            if action == 0:
-                ct[1][act_col] = ct[1][act_col] + 1
-                pp[act_col] = pp[act_col] - 1
-                if act_col + 1 < len(pp):
-                    pp[act_col + 1] = pp[act_col + 1] + 1
-            elif action == 1:
-                ct[1][act_col] = ct[1][act_col] - 1
-                pp[act_col] = pp[act_col] + 1
-                if act_col + 1 < len(pp):
-                    pp[act_col + 1] = pp[act_col + 1] - 1
-            elif action == 2:
-                ct[1][act_col] = ct[1][act_col] + 1
-                ct[0][act_col] = ct[0][act_col] - 1
-                pp[act_col] = pp[act_col] + 1
-            elif action == 3:
-                ct[1][act_col] = ct[1][act_col] - 1
-                ct[0][act_col] = ct[0][act_col] + 1
-                pp[act_col] = pp[act_col] - 1
-
-            # legalization
-            # mask 值为1 代表这个动作合法 为0代表不合法
-            for i in range(act_col + 1, len(pp) + 1):
-                # column number restriction
-                if i == len(pp):
-                    mask[act_col * action_type_num + action] = 1
-                    break
-                elif pp[i] == 1 or pp[i] == 2:
-                    mask[act_col * action_type_num + action] = 1
-                    break
-                elif pp[i] == 3:
-                    ct[0][i] = ct[0][i] + 1
-                    if i + 1 < len(pp):
-                        pp[i + 1] = pp[i + 1] + 1
-                    pp[i] = 1
-                elif pp[i] == 0:
-                    if ct[1][i] >= 1:
-                        ct[1][i] = ct[1][i] - 1
-                        if i + 1 < len(pp):
-                            pp[i + 1] = pp[i + 1] - 1
-                        pp[i] = 1
-                    else:
-                        ct[0][i] = ct[0][i] - 1
-                        if i + 1 < len(pp):
-                            pp[i + 1] = pp[i + 1] - 1
-                        pp[i] = 2
-        mask = (mask != 0)
-        indices = np.where(mask)[0]
-
-        for action in indices:
-            ct = copy.deepcopy(self.ct)
-            action_type = action % action_type_num
-            action_column = action // action_type_num
-            if action_type < 4:
-                next_state = self.__transition(ct, action_column, action_type)
-                ct32, ct22, _, __ = decompose_compressor_tree(initial_pp, next_state[0], next_state[1])
-                if len(ct32) >= self.max_stage_num:
-                    mask[int(action)] = 0
-        mask = (mask != 0)
-
-        return mask
-    # fmt: on
-    
-    # fmt: off
-    def transition(self, action_column: int, action_type: int) -> None:
-        """
-        会改变自己的状态
-        action is a number, action coding:
-            action=0: add a 2:2 compressor
-            action=1: remove a 2:2 compressor
-            action=2: replace a 3:2 compressor
-            action=3: replace a 2:2 compressor
-        Input: cur_state, action
-        Output: next_state
-        """
-        if action_type < 4:
-            # 改变压缩树
-            self.ct = self.__transition(self.ct, action_column, action_type)
-        else:
-            raise NotImplementedError
-    # fmt: on
-    
-    def __transition(
-        self, ct: np.ndarray, action_column: int, action_type: int
-    ) -> np.ndarray:
-        """
-        不会改变自己的状态, only for ct
-        action is a number, action coding:
-            action=0: add a 2:2 compressor
-            action=1: remove a 2:2 compressor
-            action=2: replace a 3:2 compressor
-            action=3: replace a 2:2 compressor
-        Input: cur_state, action
-        Output: next_state
-        """
-        if action_type == 0:
-            # add a 2:2 compressor
-            ct[1][action_column] += 1
-        elif action_type == 1:
-            # remove a 2:2 compressor
-            ct[1][action_column] -= 1
-        elif action_type == 2:
-            # replace a 3:2 compressor with a 2:2 compressor
-            ct[1][action_column] += 1
-            ct[0][action_column] -= 1
-        elif action_type == 3:
-            # replace a 2:2 compressor with a 3:2 compressor
-            ct[1][action_column] -= 1
-            ct[0][action_column] += 1
-        else:
-            raise NotImplementedError
-
-        legalized_ct32, legalized_ct22 = legalize_compressor_tree(get_initial_partial_product(self.bit_width, self.encode_type), ct[0], ct[1])
-        legalized_ct = np.zeros_like(ct)
-        legalized_ct[0] = legalized_ct32
-        legalized_ct[1] = legalized_ct22
-        return legalized_ct
-    # fmt: on
-
 class State:
     def __init__(
         self,
@@ -229,6 +47,9 @@ class State:
         final_adder_init_type: str,
         top_name: str = "MUL",
     ) -> None:
+        '''
+        encode_type: and booth
+        '''
         self.bit_width = bit_width
         self.encode_type = encode_type
         self.max_stage_num = max_stage_num
@@ -249,6 +70,7 @@ class State:
         cell_map : len pp x  len pp
         pp_wiring: pp_wiring[stage][column][wire_index]
         """
+        self.initial_pp = get_initial_partial_product(self.bit_width, self.encode_type)
         self.ct = None
         self.cell_map = None
         self.compressor_map = None
@@ -280,17 +102,23 @@ class State:
             self.get_init_cell_map()
 
     def get_initial_ct(self, ct_type):
-        pp = get_initial_partial_product(self.bit_width, self.encode_type)
         if ct_type == "random":
             ct32 = np.random.randint(0, self.get_pp_height(), self.get_pp_len())
             ct22 = np.random.randint(0, self.get_pp_height(), self.get_pp_len())
-            ct32, ct22 = legalize_compressor_tree(pp, ct32, ct22)
+            ct32, ct22 = legalize_compressor_tree(self.initial_pp, ct32, ct22)
+            ct32_decomposed, ct22_decomposed, sequence_pp, stage_num = decompose_compressor_tree(self.initial_pp, ct32, ct22)
         else:
-            ct32, ct22 = get_compressor_tree(pp, self.bit_width, ct_type)
-        ct = np.zeros([2, len(pp)])
+            ct32, ct22, ct32_decomposed, ct22_decomposed, sequence_pp, stage_num = get_compressor_tree(self.initial_pp, self.bit_width, ct_type)
+        ct = np.zeros([2, len(self.initial_pp)])
         ct[0] = ct32
         ct[1] = ct22
         self.ct = ct
+        self.stage_num = stage_num
+        self.sequence_pp = sequence_pp
+        ct_decomposed = np.zeros([2, len(ct32_decomposed), len(self.initial_pp)])
+        ct_decomposed[0] = ct32_decomposed
+        ct_decomposed[1] = ct22_decomposed
+        self.ct_decomposed = ct_decomposed
 
     def get_pp_len(self) -> int:
         if self.encode_type == "and":
@@ -306,13 +134,6 @@ class State:
         elif self.encode_type == "booth":
             return (self.bit_width) // 2 + 1
 
-    def get_stage_num(self) -> int:
-        initial_pp = get_initial_partial_product(self.bit_width, self.encode_type)
-        ct32_decomposed, ct22_decomposed, _, __ = decompose_compressor_tree(
-            initial_pp, self.ct[0], self.ct[1]
-        )
-        stage_num = len(ct32_decomposed)
-        return stage_num
 
     def get_initial_compressor_map(self, init_type: str = "default"):
         """
@@ -352,9 +173,9 @@ class State:
         assert self.ct is not None
         self.pp_wiring = np.full([self.max_stage_num, self.get_pp_len(), self.get_pp_height()], -1)
 
-        initial_pp = get_initial_partial_product(self.bit_width, self.encode_type)
-        remain_pp = copy.deepcopy(initial_pp)
-        ct32_decomposed, ct22_decomposed, _, __ = decompose_compressor_tree(initial_pp, self.ct[0], self.ct[1])
+        remain_pp = copy.deepcopy(self.initial_pp)
+        ct32_decomposed = self.ct_decomposed[0]
+        ct22_decomposed = self.ct_decomposed[1]
         stage_num = len(ct32_decomposed)
         for stage_index in range(stage_num):
             for column_index in range(self.get_pp_len()):
@@ -393,14 +214,14 @@ class State:
         assert self.ct is not None
         self.pp_wiring = np.full([self.max_stage_num, self.get_pp_len(), self.get_pp_height()], -1)
 
-        initial_pp = get_initial_partial_product(self.bit_width, self.encode_type)
-        remain_pp = copy.deepcopy(initial_pp)
-        ct32_decomposed, ct22_decomposed, _, stage_num = decompose_compressor_tree(initial_pp, self.ct[0], self.ct[1])
+        remain_pp = copy.deepcopy(self.initial_pp)
+        ct32_decomposed = self.ct_decomposed[0]
+        ct22_decomposed = self.ct_decomposed[1]
         with open(filename, 'r') as file:
             file_data = file.readlines() #读取所有行
-            assert stage_num*self.get_pp_len() == len(file_data)
+            assert self.stage_num*self.get_pp_len() == len(file_data)
             row_index = 0
-            for stage_index in range(stage_num):
+            for stage_index in range(self.stage_num):
                 for column_index in range(self.get_pp_len()):
                     wire_num = int(remain_pp[column_index])
                     tmp_list = file_data[row_index].split(' ') #按‘ ’切分每行的数据
@@ -735,12 +556,6 @@ class State:
         if not os.path.exists(verilog_dir):
             os.makedirs(verilog_dir)
         if self.top_name == "MUL":
-            initial_pp = get_initial_partial_product(self.bit_width, self.encode_type)
-            ct32_decomposed, ct22_decomposed, _, stage_num = decompose_compressor_tree(initial_pp, self.ct[0], self.ct[1])
-            ct_decomposed = np.zeros([2, len(ct32_decomposed), len(initial_pp)])
-            ct_decomposed[0] = ct32_decomposed
-            ct_decomposed[1] = ct22_decomposed
-
             pp_wiring = self.pp_wiring
             if self.use_compressor_map_optimize:
                 if len(self.compressor_map.shape) < 4:
@@ -750,7 +565,7 @@ class State:
             else:
                 compressor_map = None
 
-            self.compressor_connect_dict, self.wire_connect_dict, self.wire_constant_dict = write_mul(verilog_path, self.bit_width, ct_decomposed, pp_wiring, compressor_map, self.use_final_adder_optimize, self.cell_map)
+            self.compressor_connect_dict, self.wire_connect_dict, self.wire_constant_dict = write_mul(verilog_path, self.bit_width, self.ct_decomposed, pp_wiring, compressor_map, self.use_final_adder_optimize, self.cell_map)
         else:
             write_mul(verilog_path, None, None, None, None, None, self.cell_map, is_adder_only=True)
         # fmt: on
@@ -1040,199 +855,3 @@ class State:
 
     def update_power_mask_cell_map(self, worker: EvaluateWorker):
         self.power_mask_cell_map = worker.consult_cell_power_mask(len(self.cell_map))
-
-
-def test_routing_v0():
-    bit_width_list = [8, 16, 32]
-    ct_type_list = ["wallace", "dadda"]
-    encode_type_list = ["and", "booth"]
-    target_delay_dict = {
-        8: [50, 250, 400, 650],
-        16: [50, 200, 500, 1200],
-        32: [50, 300, 600, 2000],
-    }
-    # fmt: off
-    save_data_dict = {}
-    for bit_width in bit_width_list:
-        for encode_type in encode_type_list:
-            for ct_type in ct_type_list:
-                key = f"{bit_width}bit_{encode_type}_{ct_type}"
-                logging.info(f"{key}")
-                target_delay_list = target_delay_dict[bit_width]
-                save_data_dict[key] = {}
-                build_dir = f"pybuild/debug/routing-v0/{key}/worker"
-                if not os.path.exists(build_dir):
-                    os.makedirs(build_dir)
-                verilog_path = os.path.join(build_dir, "MUL-default.v")
-
-                state = State(bit_width, encode_type, bit_width * 2, True, "default", True, "default", False, "default")
-                state.init(ct_type)
-                state.emit_verilog(verilog_path)
-                worker = EvaluateWorker(verilog_path, ["ppa", "activity", "power"], target_delay_list, build_dir, n_processing=4, clear_dir=False, clear_log=False, clear_netlist=False)
-                worker.evaluate()
-                save_data_dict[key]["default_ppa"] = worker.consult_ppa()
-
-                opt_verilog_path = os.path.join(build_dir, "MUL-opt.v")
-                state.pp_wiring_arrangement_v0(None, None, None, None, worker)
-                state.emit_verilog(opt_verilog_path)
-                opt_worker = EvaluateWorker(opt_verilog_path, ["ppa", "activity", "power"], target_delay_list, build_dir, n_processing=4, clear_dir=False, clear_log=False, clear_netlist=False)
-                opt_worker.evaluate()
-                save_data_dict[key]["optimized"] = opt_worker.consult_ppa()
-                save_data_dict[key]["improved(%)"] = 100 * (save_data_dict[key]["default_ppa"]["power"] - save_data_dict[key]["optimized"]["power"]) / save_data_dict[key]["default_ppa"]["power"]
-
-    log_dir = "./log"
-    log_name = "pp_routing_v0.json"
-    if not os.path.exists(log_dir):
-        os.makedirs(log_dir)
-    with open(os.path.join(log_dir, log_name), "w") as file:
-        json.dump(save_data_dict, file)
-
-
-def test_routing_v0_post_handler():
-    # fmt: off
-    bit_width_list = [8, 16, 32]
-    ct_type_list = ["wallace", "dadda"]
-    encode_type_list = ["and", "booth"]
-    with open("./log/pp_routing_v0.json", "r") as file:
-        save_data_dict = json.load(file)
-
-    for bit_width in bit_width_list:
-        for encode_type in encode_type_list:
-            for ct_type in ct_type_list:
-                key = f"{bit_width}bit_{encode_type}_{ct_type}"
-                for kkey in save_data_dict[key].keys():
-                    try:
-                        for kkkey in save_data_dict[key][kkey].keys():
-                            save_data_dict[key][kkey][kkkey] = np.round(save_data_dict[key][kkey][kkkey], 6)
-                    except:
-                        save_data_dict[key][kkey] = np.round(save_data_dict[key][kkey], 6)
-    with open("./log/pp_routing_v0-post.json", "w") as file:
-        json.dump(save_data_dict, file)
-
-    import pandas as pd
-    df = pd.DataFrame(save_data_dict)
-    df.to_csv("./log/pp_routing_v0-post.csv", index=False)
-
-
-def test_routing_v1():
-    bit_width_list = [8, 16, 32]
-    ct_type_list = ["wallace", "dadda"]
-    encode_type_list = ["and", "booth"]
-    target_delay_dict = {
-        8: [50, 250, 400, 650],
-        16: [50, 200, 500, 1200],
-        32: [50, 300, 600, 2000],
-    }
-    save_data_dict = {}
-    for bit_width in bit_width_list:
-        for encode_type in encode_type_list:
-            for ct_type in ct_type_list:
-                key = f"{bit_width}bit_{encode_type}_{ct_type}"
-                logging.info(f"{key}")
-                target_delay_list = target_delay_dict[bit_width]
-                save_data_dict[key] = {}
-                build_dir = f"pybuild/debug/routing/{key}/worker"
-                if not os.path.exists(build_dir):
-                    os.makedirs(build_dir)
-                verilog_path = os.path.join(build_dir, "MUL-default.v")
-                # fmt: off
-                state = State(bit_width, encode_type, bit_width * 2, True, "default", True, "default", False, "default")
-                state.init(ct_type)
-                state.emit_verilog(verilog_path)
-                worker = EvaluateWorker(verilog_path, ["ppa", "activity", "power"], target_delay_list, build_dir, n_processing=4, clear_dir=False, clear_log=False, clear_netlist=False)
-                worker.evaluate()
-                save_data_dict[key]["default_ppa"] = worker.consult_ppa()
-                ppa_list = []
-                from tqdm import tqdm
-                max_n = state.stage_num * state.get_pp_len()
-                stride = (max_n - 1) // 30 + 1
-                n_list = range(1, max_n, stride)
-                for n in tqdm(n_list):
-                    opt_state = copy.deepcopy(state)
-                    opt_state.pp_wiring_arrangement_v1(
-                        None, None, None, None, n, worker
-                    )
-                    opt_verilog_path = os.path.join(build_dir, f"MUL-{n}.v")
-                    opt_state.emit_verilog(opt_verilog_path)
-                    opt_worker = EvaluateWorker(
-                        opt_verilog_path,
-                        ["ppa", "activity", "power"],
-                        target_delay_list,
-                        build_dir,
-                        n_processing=4,
-                        clear_dir=False,
-                        clear_log=False,
-                        clear_netlist=False,
-                    )
-                    opt_worker.evaluate()
-                    ppa_list.append(opt_worker.consult_ppa())
-                save_data_dict[key]["optimized"] = ppa_list
-    log_dir = "./log"
-    log_name = "pp_routing_v1.json"
-    if not os.path.exists(log_dir):
-        os.makedirs(log_dir)
-    with open(os.path.join(log_dir, log_name), "w") as file:
-        json.dump(save_data_dict, file)
-
-
-def test_routing_v1_post_handler():
-    # fmt: off
-    bit_width_list = [8, 16, 32]
-    ct_type_list = ["wallace", "dadda"]
-    encode_type_list = ["and", "booth"]
-    new_save_data_dict = {}
-    with open("./log/pp_routing_v1.json", "r") as file:
-        save_data_dict = json.load(file)
-
-    plot_index = 1
-    plt.figure(figsize=[16, 10])
-    for bit_width in bit_width_list:
-        for encode_type in encode_type_list:
-            for ct_type in ct_type_list:
-                plt.subplot(3, 4, plot_index)
-                plot_index += 1
-                key = f"{bit_width}bit_{encode_type}_{ct_type}"
-                new_save_data_dict[key] = {}
-                default_power = save_data_dict[key]["default_ppa"]["power"]
-                new_save_data_dict[key]["default_power"] = np.round(default_power, 6)
-
-                state = State(bit_width, encode_type, bit_width * 2, True, "default", True, "default", False, "default")
-                state.init(ct_type)
-
-                max_n = state.stage_num * state.get_pp_len()
-                stride = (max_n - 1) // 30 + 1
-                n_list = range(1, max_n, stride)
-
-                power_data = [data["power"] for data in save_data_dict[key]["optimized"]]
-                improve_data = [(default_power - power) / (default_power) * 100 for power in power_data]
-                plt.plot(n_list, improve_data, "--o", label=key)
-                plt.legend()
-                plt.tight_layout()
-
-                min_power = min(power_data)
-                min_index = power_data.index(min_power)
-                min_n = n_list[min_index]
-                new_save_data_dict[key]["optimized_best"] = {
-                    "n": min_n,
-                    "power": np.round(min_power, 6),
-                    "improved(%)": np.round(100 * (default_power - min_power) / (default_power), 6),
-                }
-                # fmt: on
-    plt.savefig("./log/pp_routing_v1-post.png")
-    plt.show()
-    with open("./log/pp_routing_v1-post.json", "w") as file:
-        json.dump(new_save_data_dict, file)
-
-    import pandas as pd
-    df = pd.DataFrame(new_save_data_dict)
-    df.to_csv("./log/pp_routing_v1-post.csv", index=False)
-
-
-if __name__ == "__main__":
-    build_path = "./pybuild/debug/adder_test"
-    state = State(
-        16, "and", 32, True, "default", True, "default", True, "sklansky"
-    )
-
-    state.init("dadda")
-    state.emit_verilog("./MUL.v")
