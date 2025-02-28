@@ -95,3 +95,48 @@ Solution count 2: 2.84567 2.84567
 
 Optimal solution found (tolerance 1.00e-01)
 Best objective 2.845666632056e+00, best bound 2.845666632056e+00, gap 0.0000%
+
+Gurobi 12.0.1 (linux64) logging started Thu Feb 27 22:34:28 2025
+
+Set parameter LogFile to value "ysh_output/32bits_and_1/grb.log"
+Set parameter Presolve to value 2
+Set parameter TimeLimit to value 7200
+Set parameter MIPGap to value 0.1
+Gurobi Optimizer version 12.0.1 build v12.0.1rc0 (linux64 - "Ubuntu 22.04.5 LTS")
+
+CPU model: 12th Gen Intel(R) Core(TM) i5-12600KF, instruction set [SSE2|AVX|AVX2]
+Thread count: 8 physical cores, 8 logical processors, using up to 8 threads
+
+Non-default parameters:
+TimeLimit  7200
+MIPGap  0.1
+Presolve  2
+
+Optimize a model with 94884 rows, 49601 columns and 348792 nonzeros
+Model fingerprint: 0x4facd16b
+Variable types: 7626 continuous, 41975 integer (41975 binary)
+Coefficient statistics:
+  Matrix range     [6e-03, 1e+30]
+  Objective range  [1e+00, 1e+00]
+  Bounds range     [1e+00, 1e+00]
+  RHS range        [9e-02, 1e+30]
+Warning: Model contains large matrix coefficient range
+Warning: Model contains large rhs
+         Consider reformulating model or setting NumericFocus parameter
+         to avoid numerical issues.
+Presolve removed 87671 rows and 5460 columns
+Presolve time: 0.02s
+Presolved: 7213 rows, 44141 columns, 88179 nonzeros
+Variable types: 2782 continuous, 41359 integer (41359 binary)
+Found heuristic solution: objective 2.8456666
+Performing another presolve...
+Presolve removed 7149 rows and 43117 columns
+Presolve time: 0.33s
+
+Explored 1 nodes (0 simplex iterations) in 0.43 seconds (0.74 work units)
+Thread count was 8 (of 8 available processors)
+
+Solution count 2: 2.84567 2.84567 
+
+Optimal solution found (tolerance 1.00e-01)
+Best objective 2.845666632056e+00, best bound 2.845666632056e+00, gap 0.0000%

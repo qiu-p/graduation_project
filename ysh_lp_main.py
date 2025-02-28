@@ -29,16 +29,11 @@ class WireMap:
         
         self._get_coefficient()
         
-        initial_pp = get_initial_partial_product(self.bit_width, self.pp_encode_type)
-        ct32_decomposed, ct22_decomposed, sequence_pp, stage_num = decompose_compressor_tree(initial_pp, self.cur_state.ct[0], self.cur_state.ct[1])
-        self.ct_decomposed = np.zeros([2, len(ct32_decomposed), len(initial_pp)]) # (2, stage_num, column_num)
-        self.ct_decomposed[0] = ct32_decomposed
-        self.ct_decomposed[1] = ct22_decomposed
-
-        self.stage_num = stage_num
-        self.column_num = len(initial_pp)
+        self.ct_decomposed = self.cur_state.ct_decomposed # (2, stage_num, column_num)
+        self.stage_num = self.cur_state.stage_num
+        self.column_num = len(self.cur_state.initial_pp)
         self.ct_decomposed = self.ct_decomposed.astype(int)
-        self.pp = sequence_pp
+        self.pp = self.cur_state.sequence_pp
         
         self.output_dir = '{}/{}bits_{}_{}/'.format(output_base_dir, self.bit_width, self.pp_encode_type, task_index)
         self.wire_map_filename = self.output_dir + 'wire_map.txt'
@@ -323,7 +318,7 @@ class WireMap:
                 print("IIS 已保存到 model.ilp 文件，请检查冲突的约束。")
 
 if __name__ == '__main__':
-    task_index = 0 # 0: wallace  1: dadda
+    task_index = 1 # 0: wallace  1: dadda
 
     bit_width = 32
     pp_encode_type = 'and'
@@ -348,7 +343,7 @@ if __name__ == '__main__':
     state.init(init_ct_type)
     wire_map = WireMap(state, 'ysh_output', task_index)
 
-    print('stage_num:', state.get_stage_num())
+    print('stage_num:', state.stage_num)
     print(state.ct)
     print(wire_map.ct_decomposed)
     print(wire_map.pp)

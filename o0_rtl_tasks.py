@@ -4,6 +4,7 @@ import logging
 import multiprocessing
 import os
 import re
+import time
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -14,6 +15,8 @@ from o0_mul_utils import (
     legal_FA_list,
     legal_HA_list,
 )
+
+is_source_env = False
 
 # OpenRoadFlowPath = "/home/xiaxilin/MiraLab/OpenROAD-flow-scripts"
 # lef = "/home/xiaxilin/MiraLab/nips2024/ai4-multiplier-master/data/NangateOpenCellLibrary.lef"
@@ -271,10 +274,15 @@ class EvaluateWorker:
             sta_script += sta_script_template_end
             with open(sta_script_path, "w") as file: file.write(f"{sta_script}")
             logging.info(f"worker-{worker_id} simulating")
-            sta_cmd = (
-                f"source {OpenRoadFlowPath}/env.sh > {log_path} 2>&1\n"
-                + f"openroad {sta_script_path} > {log_path}"
-            )
+            if is_source_env:
+                sta_cmd = (
+                    f"source {OpenRoadFlowPath}/env.sh > {log_path} 2>&1\n"
+                    + f"openroad {sta_script_path} > {log_path}"
+                )
+            else:
+                sta_cmd = (
+                    f"openroad {sta_script_path} > {log_path}"
+                )
             os.system(sta_cmd)
         
         result = {}
@@ -416,6 +424,10 @@ class EvaluateWorker:
             # results = [self.evaluate_worker(*(param_list[0]))]
             results = [self.evaluate_worker(*(param)) for param in param_list]
         self.results = results
+        #for i, result in enumerate(results):
+        #    print(i)
+        #    print(result['power'].__class__)
+        #    print(result['power'])
         return results
 
     def update_wire_constant_dict(self, wire_constant_dict):
@@ -654,10 +666,15 @@ class PowerSlewConsulter:
                         with open(sta_script_path, "w") as file:
                             file.write(f"{sta_script}")
                         yosys_cmd = f"yosys {yosys_path} > {yosys_out_path} 2>&1"
-                        sta_cmd = (
-                            f"source {OpenRoadFlowPath}/env.sh > {log_path} 2>&1\n"
-                            + f"openroad {sta_script_path} > {log_path}"
-                        )
+                        if is_source_env:
+                            sta_cmd = (
+                                f"source {OpenRoadFlowPath}/env.sh > {log_path} 2>&1\n"
+                                + f"openroad {sta_script_path} > {log_path}"
+                            )
+                        else:
+                            sta_cmd = (
+                                f"openroad {sta_script_path} > {log_path}"
+                            )
                         logging.info(f"simulating {fa_type}:{port_name}")
                         os.system(yosys_cmd)
                         os.system(sta_cmd)

@@ -1,0 +1,6 @@
+
+read -sv ysh_output/32bits_and_0/32bits_and_1/MUL.v
+synth -top MUL
+dfflibmap -liberty /home/qiu/work/graduation_project/dataset/NangateOpenCellLibrary_typical.lib
+abc -D 500 -constr ysh_output/32bits_and_0/32bits_and_1/worker_2/abc_constr -liberty /home/qiu/work/graduation_project/dataset/NangateOpenCellLibrary_typical.lib
+write_verilog ysh_output/32bits_and_0/32bits_and_1/worker_2/netlist.v

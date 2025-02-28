@@ -1,0 +1,7 @@
+OpenROAD v2.0-17598-ga008522d8 
+Features included (+) or not (-): +Charts +GPU +GUI +Python : None
+This program is licensed under the BSD-3 license. See the LICENSE file for details.
+Components of this program may be licensed under more restrictive licenses which must be honored.
+[INFO ODB-0227] LEF file: /home/qiu/work/graduation_project/dataset/NangateOpenCellLibrary.lef, created 22 layers, 27 vias, 134 library cells
+Error: sta.tcl, 4 cannot read file ysh_output/32bits_and_0/32bits_and_1/worker_3/netlist.v.
+[?2004hopenroad> 

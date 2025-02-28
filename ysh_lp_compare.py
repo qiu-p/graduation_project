@@ -2,6 +2,7 @@ import numpy as np
 import scipy.sparse as sp
 import copy
 import os
+import time
 from ysh_tools.utils import make_dir
 
 from o0_rtl_tasks import EvaluateWorker, PowerSlewConsulter
@@ -64,7 +65,7 @@ class Compare:
             top_name=self.top_name,
         )
         evaluate_worker_1.evaluate()
-        state_1.update_power_mask(evaluate_worker_1)
+        # state_1.update_power_mask(evaluate_worker_1)
         
         state_2 = copy.deepcopy(self.cur_state)
         state_2.set_pp_wiring(self.wire_map_filename)
@@ -78,7 +79,7 @@ class Compare:
             top_name=self.top_name,
         )
         evaluate_worker_2.evaluate()
-        state_2.update_power_mask(evaluate_worker_2)
+        # state_2.update_power_mask(evaluate_worker_2)
         print(evaluate_worker_1.consult_ppa())
         print(evaluate_worker_2.consult_ppa())
 
@@ -86,8 +87,8 @@ if __name__ == '__main__':
     task_index = 1
     
     bit_width = 32
-    # pp_encode_type = 'and'
-    pp_encode_type = 'booth'
+    pp_encode_type = 'and'
+    # pp_encode_type = 'booth'
     if task_index == 0:
         init_ct_type = 'wallace'
     elif task_index == 1:
